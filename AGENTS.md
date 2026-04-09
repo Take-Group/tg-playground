@@ -151,5 +151,16 @@ Gdy zmieniasz kod objęty skillem — zaktualizuj też skill. Nieaktualny skill 
 - [new-component.md](skills/frontend/new-component.md) — how to add a UI component (shadcn + CVA pattern)
 - [api-communication.md](skills/frontend/api-communication.md) — how to connect frontend to backend API (React Query + fetch)
 
+### Firmowe API (MCP — TG Endpoints)
+Jeśli potrzebujesz danych z wewnętrznych projektów firmowych — **Blog CMS, VOD CMS, LP CMS, OSA, OMS, DMS** — korzystaj z firmowego serwera MCP.
+
+- **Strona z instrukcją instalacji:** https://endpoints-mcp.affleaders.com/
+- **Adres połączenia MCP:** https://endpoints-mcp.affleaders.com/mcp
+
+Serwer MCP daje read-only dostęp do endpointów produkcyjnych tych projektów. Workflow:
+1. `list_endpoints` z nazwą projektu → lista dostępnych endpointów
+2. `call_endpoint` z projektem + nazwą endpointu → dane
+3. Opcjonalnie można nadpisać query/path params przez argument `params`
+
 ### Narzędzia
 Pracujemy głównie z **Claude Code** i **Codex**. Oba narzędzia czytają ten plik, więc trzymaj się tych zasad niezależnie od tego, które narzędzie jest używane.
