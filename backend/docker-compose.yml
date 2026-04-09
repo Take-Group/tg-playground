@@ -1,3 +1,5 @@
+name: tg-playground-backend
+
 services:
   postgres:
     image: postgres:18
@@ -28,16 +30,23 @@ services:
   temporal:
     image: temporalio/auto-setup:latest
     environment:
-      DB: postgresql
+      DB: postgres12
       DB_PORT: 5432
       POSTGRES_USER: postgres
       POSTGRES_PWD: postgres
       POSTGRES_SEEDS: postgres
+      BIND_ON_IP: 0.0.0.0
     ports:
       - "7233:7233"
     depends_on:
       postgres:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "temporal", "--address", "127.0.0.1:7233", "operator", "cluster", "health"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 15s
 
   temporal-ui:
     image: temporalio/ui:latest
@@ -46,7 +55,8 @@ services:
     ports:
       - "8233:8080"
     depends_on:
-      - temporal
+      temporal:
+        condition: service_healthy
 
   migrations:
     build:
@@ -91,8 +101,10 @@ services:
     volumes:
       - ./app:/app/app
     depends_on:
-      - temporal
-      - migrations
+      temporal:
+        condition: service_healthy
+      migrations:
+        condition: service_completed_successfully
 
 volumes:
   pgdata:

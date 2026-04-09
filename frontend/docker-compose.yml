@@ -1,3 +1,5 @@
+name: tg-playground-frontend
+
 services:
   frontend:
     build:
