@@ -1,0 +1,78 @@
+# === Python ===
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+*.whl
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+
+# === IDE / Editors ===
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+
+# === OS ===
+.DS_Store
+Thumbs.db
+desktop.ini
+.Spotlight-V100
+.Trashes
+
+# === Environment / Secrets ===
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.crt
+*.p12
+
+# === Docker ===
+# Local docker override (personal tweaks)
+docker-compose.override.yml
+
+# === Databases ===
+*.sqlite3
+*.db
+
+# === Logs ===
+*.log
+logs/
+
+# === Coverage / Testing ===
+.coverage
+htmlcov/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# === Temporal ===
+# Temporal local data (if running outside Docker)
+temporal-data/
+
+# === AI Tools ===
+.claude/
+.codex/
+.cursor/
+.aider*
+
+# === Misc ===
+*.bak
+*.tmp
+*.temp
+*.orig
+*.rej
