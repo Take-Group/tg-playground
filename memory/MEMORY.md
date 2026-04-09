@@ -1,0 +1,1 @@
+- [Project Overview](project_overview.md) — boilerplate AI dla osób nietechnicznych, Docker-only, SOLID, max 600 linii

@@ -1,0 +1,28 @@
+FROM ghcr.io/astral-sh/uv:python3.14-bookworm-slim AS base
+
+WORKDIR /app
+
+ENV UV_COMPILE_BYTECODE=1 \
+    UV_LINK_MODE=copy \
+    PYTHONUNBUFFERED=1
+
+# Install dependencies first (cached layer)
+COPY pyproject.toml uv.lock ./
+RUN uv sync --frozen --no-install-project --no-dev
+
+# Copy application code
+COPY . .
+RUN uv sync --frozen --no-dev
+
+# --- API target ---
+FROM base AS api
+EXPOSE 8000
+CMD ["uv", "run", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+
+# --- Worker target ---
+FROM base AS worker
+CMD ["uv", "run", "worker"]
+
+# --- Migrations target ---
+FROM base AS migrations
+CMD ["uv", "run", "alembic", "upgrade", "head"]
