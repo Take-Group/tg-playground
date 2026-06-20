@@ -18,7 +18,7 @@ services:
       retries: 5
 
   redis:
-    image: redis:7-alpine
+    image: redis:8-alpine
     ports:
       - "6379:6379"
     healthcheck:
@@ -47,16 +47,6 @@ services:
       timeout: 5s
       retries: 20
       start_period: 15s
-
-  temporal-ui:
-    image: temporalio/ui:latest
-    environment:
-      TEMPORAL_ADDRESS: temporal:7233
-    ports:
-      - "8233:8080"
-    depends_on:
-      temporal:
-        condition: service_healthy
 
   migrations:
     build:
