@@ -27,9 +27,8 @@ Zależności infrastrukturalne:
 | Serwis      | Port | Opis                        |
 |-------------|------|-----------------------------|
 | postgres    | 5433 | PostgreSQL 18               |
-| redis       | 6379 | Redis 7 (Alpine)            |
+| redis       | 6379 | Redis 8 (Alpine)            |
 | temporal    | 7233 | Temporal server             |
-| temporal-ui | 8233 | Panel Temporal (debug UI)   |
 
 ---
 
@@ -49,7 +48,6 @@ Migracje bazy wykonają się automatycznie przed startem API.
 - API: http://localhost:8000
 - API health: http://localhost:8000/health
 - API readiness: http://localhost:8000/health/ready
-- Temporal UI: http://localhost:8233
 
 ### Zatrzymanie
 ```bash

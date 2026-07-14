@@ -35,7 +35,6 @@ docker compose down -v
 | Frontend     | http://localhost:3000           |
 | API          | http://localhost:8000           |
 | API health   | http://localhost:8000/health    |
-| Temporal UI  | http://localhost:8233           |
 
 ---
 
