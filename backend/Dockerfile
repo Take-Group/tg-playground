@@ -1,4 +1,4 @@
-FROM ghcr.io/astral-sh/uv:python3.14-bookworm-slim AS base
+FROM ghcr.io/astral-sh/uv:0.11.31-python3.14-trixie-slim AS base
 
 WORKDIR /app
 
@@ -6,13 +6,17 @@ ENV UV_COMPILE_BYTECODE=1 \
     UV_LINK_MODE=copy \
     PYTHONUNBUFFERED=1
 
+RUN groupadd --system app && useradd --system --gid app --home-dir /app app
+
 # Install dependencies first (cached layer)
 COPY pyproject.toml uv.lock ./
 RUN uv sync --frozen --no-install-project --no-dev
 
 # Copy application code
-COPY . .
-RUN uv sync --frozen --no-dev
+COPY --chown=app:app . .
+RUN uv sync --frozen --no-dev && chown -R app:app /app
+
+USER app
 
 # --- API target ---
 FROM base AS api

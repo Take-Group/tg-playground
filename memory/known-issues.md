@@ -29,4 +29,24 @@ warto pamiętać przy komercyjnym użyciu.
 
 ## Temporal UI usunięte
 Panel `temporal-ui` (port 8233) wyrzucony z `backend/docker-compose.yml` —
-sam serwer `temporal` (7233) zostaje, bo worker go potrzebuje.
+sam serwer `temporal` zostaje, bo worker go potrzebuje. Serwer działa na
+wspieranym `temporalio/server`; schemat i namespace inicjalizują osobne,
+krótkotrwałe kontenery `temporalio/admin-tools`. Port 7233 nie jest
+publikowany na hoście.
+
+## Upstreamowe CVE w obrazach Temporal
+
+Trivy może nadal zgłaszać podatności w skompilowanych binariach Go
+dostarczanych przez oficjalne obrazy Temporal. Nie da się ich naprawić
+aktualizacją pakietów aplikacji. Przy kolejnych wydaniach obrazów sprawdź,
+czy upstream opublikował wersję z poprawionym Go/gRPC, i aktualizuj przypięte
+tagi po pełnym teście Docker Compose.
+
+## Lokalny wolumen PostgreSQL z obcą historią Alembic
+
+Na maszynie użytej podczas audytu istniejący wolumen
+`tg-playground-backend_pgdata` zawiera rewizję Alembic `478be46c25fa`
+i tabele, których nie ma w tym boilerplate. Wolumen został zachowany.
+Świeży wolumen przechodzi migracje poprawnie. Przed ewentualnym
+`docker compose down -v` trzeba zdecydować, czy te lokalne dane wymagają
+kopii zapasowej.

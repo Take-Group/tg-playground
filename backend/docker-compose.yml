@@ -2,33 +2,48 @@ name: tg-playground-backend
 
 services:
   postgres:
-    image: postgres:18
+    build:
+      context: .
+      dockerfile: Dockerfile.postgres
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: tg_playground
-    ports:
-      - "5433:5432"
     volumes:
       - pgdata:/var/lib/postgresql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d tg_playground"]
       interval: 5s
       timeout: 3s
       retries: 5
 
   redis:
-    image: redis:8-alpine
-    ports:
-      - "6379:6379"
+    image: redis:8.8.0-alpine
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
       timeout: 3s
       retries: 5
 
+  temporal-schema-setup:
+    image: temporalio/admin-tools:1.31.2
+    environment:
+      DB: postgres12
+      DB_PORT: 5432
+      POSTGRES_USER: postgres
+      POSTGRES_PWD: postgres
+      POSTGRES_SEEDS: postgres
+      SQL_PASSWORD: postgres
+    entrypoint: ["/bin/sh"]
+    command: ["/scripts/setup-postgres.sh"]
+    volumes:
+      - ./temporal/scripts:/scripts:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+
   temporal:
-    image: temporalio/auto-setup:latest
+    image: temporalio/server:1.31.2
     environment:
       DB: postgres12
       DB_PORT: 5432
@@ -36,17 +51,32 @@ services:
       POSTGRES_PWD: postgres
       POSTGRES_SEEDS: postgres
       BIND_ON_IP: 0.0.0.0
-    ports:
-      - "7233:7233"
+      DYNAMIC_CONFIG_FILE_PATH: config/dynamicconfig/development-sql.yaml
+    volumes:
+      - ./temporal/dynamicconfig:/etc/temporal/config/dynamicconfig:ro
     depends_on:
-      postgres:
-        condition: service_healthy
+      temporal-schema-setup:
+        condition: service_completed_successfully
     healthcheck:
-      test: ["CMD", "temporal", "--address", "127.0.0.1:7233", "operator", "cluster", "health"]
+      test: ["CMD", "nc", "-z", "127.0.0.1", "7233"]
       interval: 5s
-      timeout: 5s
-      retries: 20
-      start_period: 15s
+      timeout: 3s
+      retries: 60
+      start_period: 30s
+
+  temporal-create-namespace:
+    image: temporalio/admin-tools:1.31.2
+    environment:
+      TEMPORAL_ADDRESS: temporal:7233
+      DEFAULT_NAMESPACE: default
+      DEFAULT_NAMESPACE_RETENTION: 24h
+    entrypoint: ["/bin/sh"]
+    command: ["/scripts/create-namespace.sh"]
+    volumes:
+      - ./temporal/scripts:/scripts:ro
+    depends_on:
+      temporal:
+        condition: service_healthy
 
   migrations:
     build:
@@ -69,7 +99,7 @@ services:
       TEMPORAL_HOST: temporal:7233
       DEBUG: "true"
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
     volumes:
       - ./app:/app/app
     depends_on:
@@ -91,8 +121,8 @@ services:
     volumes:
       - ./app:/app/app
     depends_on:
-      temporal:
-        condition: service_healthy
+      temporal-create-namespace:
+        condition: service_completed_successfully
       migrations:
         condition: service_completed_successfully
 

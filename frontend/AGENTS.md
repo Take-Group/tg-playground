@@ -16,14 +16,16 @@
 ## Uruchomienie w Docker
 
 ```bash
-docker build -t tg-playground-frontend .
-docker run -p 3000:3000 tg-playground-frontend
+cd frontend
+docker compose up --build
 ```
 
 Dockerfile korzysta z multi-stage build:
 
-1. **base** — `oven/bun:1` — instaluje zaleznosci i buduje aplikacje (`bun run build`).
-2. **runner** — `oven/bun:1-slim` — kopiuje standalone output i serwuje przez `bun server.js`.
+1. **runtime** — przypiety Bun Alpine z aktualnymi bibliotekami systemowymi.
+2. **base** — instaluje zaleznosci i uruchamia development jako uzytkownik `bun`.
+3. **build** — buduje aplikacje (`bun run build`).
+4. **runner** — kopiuje standalone output i serwuje przez `bun server.js` jako non-root.
 
 Next.js jest skonfigurowany z `output: "standalone"` (`next.config.ts`), dzieki czemu `.next/standalone` zawiera minimalny serwer gotowy do deploymentu.
 
@@ -40,6 +42,15 @@ Next.js jest skonfigurowany z `output: "standalone"` (`next.config.ts`), dzieki 
 ### Limity rozmiaru
 
 - **Maksymalnie 600 linii na plik.** Jesli plik przekracza ten limit — rozdziel go na mniejsze moduly. Celem jest utrzymanie czytelnosci i niedopuszczenie do zapychania kontekstu AI.
+
+### Bezwzgledny zakaz pisania testow automatycznych
+
+**AI nie moze w zadnym przypadku tworzyc ani modyfikowac testow automatycznych.**
+
+- Nie tworz plikow testowych, test case'ow, fixture'ow, mockow ani snapshotow.
+- Nie dodawaj frameworkow testowych, skryptow testowych ani konfiguracji testow lub CI.
+- Nie rozszerzaj ani nie poprawiaj istniejacych testow automatycznych.
+- Frontend weryfikuj przez lint, type-check, audyty, build oraz reczne sprawdzenie dzialania w Dockerze.
 
 ### Next.js 16
 

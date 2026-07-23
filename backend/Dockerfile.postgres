@@ -1,0 +1,5 @@
+FROM postgres:18.4
+
+RUN rm /usr/local/bin/gosu
+
+USER postgres

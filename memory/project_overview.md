@@ -13,5 +13,6 @@ TG Playground to boilerplate do kodowania z pomocą AI (Claude Code, Codex). Uż
 - Uruchamianie wyłącznie przez Docker — osobno w `backend/` i `frontend/` (`cd backend && docker compose up --build`, analogicznie frontend)
 - Zasady SOLID w całym kodzie
 - Max 600 linii na plik
-- Przed zgłoszeniem gotowości: uruchom lintery i przetestuj endpoint/job
+- AI nigdy nie tworzy ani nie modyfikuje testów automatycznych, ich konfiguracji ani frameworków
+- Przed zgłoszeniem gotowości: uruchom lintery i ręcznie zweryfikuj endpoint/job w Dockerze
 - Szczegóły stacku w `backend/AGENTS.md` i `frontend/AGENTS.md`

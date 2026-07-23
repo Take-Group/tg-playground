@@ -99,11 +99,19 @@ Jeśli plik zbliża się do limitu:
 
 Uzasadnienie: duże pliki zapychają kontekst AI i uniemożliwiają efektywną pracę.
 
+### Bezwzględny zakaz pisania testów automatycznych
+**AI nie może w żadnym przypadku tworzyć ani modyfikować testów automatycznych.**
+
+- Nie twórz plików testowych, test case'ów, fixture'ów, mocków ani snapshotów
+- Nie dodawaj frameworków testowych, skryptów testowych ani konfiguracji testów lub CI
+- Nie rozszerzaj ani nie poprawiaj istniejących testów automatycznych
+- Zmiany weryfikuj przez lintery, type-checkery, audyty, build oraz ręczne uruchomienie i sprawdzenie działania w Dockerze
+
 ### Weryfikacja przed odpowiedzią
 Za każdym razem gdy zmieniasz kod, **zanim powiesz użytkownikowi że jest gotowe**, musisz:
 1. **Sprawdzić poprawność kodu** — uruchom lintery/type-checkery aby upewnić się, że nie ma błędów importów, brakujących zależności ani warningów
-2. **Przetestować działanie** — jeśli to endpoint: wyślij request i sprawdź czy zwraca poprawny status. Jeśli to job/workflow: uruchom go i zweryfikuj wynik
-3. **Nie zgłaszaj niczego jako gotowe** dopóki testy nie przejdą pomyślnie
+2. **Ręcznie zweryfikować działanie** — jeśli to endpoint: wyślij request i sprawdź czy zwraca poprawny status. Jeśli to job/workflow: uruchom go i zweryfikuj wynik
+3. **Nie zgłaszaj niczego jako gotowe** dopóki ręczna weryfikacja i kontrole jakości nie przejdą pomyślnie
 
 ### Pamięć projektu
 Po każdej sesji pracy **zapisuj kluczowe informacje** do folderu `memory/` w katalogu głównym projektu. Zapisuj:
@@ -144,6 +152,7 @@ Gdy zmieniasz kod objęty skillem — zaktualizuj też skill. Nieaktualny skill 
 - [new-endpoint.md](skills/backend/new-endpoint.md) — how to add a new REST API endpoint (router → service → schema)
 - [new-model.md](skills/backend/new-model.md) — how to add a SQLAlchemy model + Alembic migration
 - [new-workflow.md](skills/backend/new-workflow.md) — how to add a Temporal workflow + activities
+- [temporal-local-stack.md](skills/backend/temporal-local-stack.md) — how the local Temporal Server is initialized without Web UI
 
 **Frontend (`skills/frontend/`):**
 - [new-page.md](skills/frontend/new-page.md) — how to add a new page/route (App Router)
