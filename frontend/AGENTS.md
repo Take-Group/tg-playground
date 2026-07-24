@@ -13,7 +13,14 @@
 | Ikony           | Lucide React                         |
 | Linting         | ESLint 9 (eslint-config-next)        |
 
-## Uruchomienie w Docker
+## Uruchomienie całego projektu (zalecane)
+
+```bash
+cd tg-playground
+docker compose up --build
+```
+
+## Uruchomienie tylko frontendu
 
 ```bash
 cd frontend

@@ -1,3 +1,5 @@
 - [Project Overview](project_overview.md) — boilerplate AI dla osób nietechnicznych, Docker-only, SOLID, max 600 linii
 - [UI Design System](ui-design-system.md) — font sans, dark slate/navy + teal primary, kursory, konwencje modali/tabel/dashboardów
 - [Known issues](known-issues.md) — przypięte ESLint/TypeScript, Redis 8, Temporal bez UI i upstreamowe CVE obrazów
+- [Project timezone](timezone.md) — `Europe/Warsaw` dla usług, reguł biznesowych i prezentacji
+- [Docker orchestration](docker-orchestration.md) — jeden główny Compose z opcjonalnym uruchamianiem osobnych stosów

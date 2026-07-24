@@ -1,5 +1,10 @@
 FROM postgres:18.4
 
-RUN rm /usr/local/bin/gosu
+ENV TZ=Europe/Warsaw
+
+RUN apt-get update \
+    && apt-get install --yes --no-install-recommends tzdata \
+    && rm -rf /var/lib/apt/lists/* \
+    && rm /usr/local/bin/gosu
 
 USER postgres

@@ -42,7 +42,13 @@ wyłącznie wewnątrz sieci Docker Compose.
 ### Wymagania
 - Docker + Docker Compose
 
-### Start (cały stack)
+### Start całego projektu (zalecane)
+```bash
+cd tg-playground
+docker compose up --build
+```
+
+### Start tylko backendu
 ```bash
 cd tg-playground
 cd backend

@@ -1,3 +1,4 @@
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -11,6 +12,7 @@ class Settings(BaseSettings):
     # App
     app_name: str = "TG Playground Backend"
     debug: bool = False
+    timezone: str = Field(default="Europe/Warsaw", validation_alias="TZ")
 
     # PostgreSQL
     database_url: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/tg_playground"

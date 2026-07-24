@@ -2,9 +2,14 @@ FROM ghcr.io/astral-sh/uv:0.11.31-python3.14-trixie-slim AS base
 
 WORKDIR /app
 
-ENV UV_COMPILE_BYTECODE=1 \
+ENV TZ=Europe/Warsaw \
+    UV_COMPILE_BYTECODE=1 \
     UV_LINK_MODE=copy \
     PYTHONUNBUFFERED=1
+
+RUN apt-get update \
+    && apt-get install --yes --no-install-recommends tzdata \
+    && rm -rf /var/lib/apt/lists/*
 
 RUN groupadd --system app && useradd --system --gid app --home-dir /app app
 

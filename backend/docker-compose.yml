@@ -5,7 +5,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.postgres
+    command: ["postgres", "-c", "timezone=Europe/Warsaw", "-c", "log_timezone=Europe/Warsaw"]
     environment:
+      TZ: Europe/Warsaw
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: tg_playground
@@ -18,7 +20,11 @@ services:
       retries: 5
 
   redis:
-    image: redis:8.8.0-alpine
+    build:
+      context: .
+      dockerfile: Dockerfile.redis
+    environment:
+      TZ: Europe/Warsaw
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 5s
@@ -28,6 +34,7 @@ services:
   temporal-schema-setup:
     image: temporalio/admin-tools:1.31.2
     environment:
+      TZ: Europe/Warsaw
       DB: postgres12
       DB_PORT: 5432
       POSTGRES_USER: postgres
@@ -45,6 +52,7 @@ services:
   temporal:
     image: temporalio/server:1.31.2
     environment:
+      TZ: Europe/Warsaw
       DB: postgres12
       DB_PORT: 5432
       POSTGRES_USER: postgres
@@ -67,6 +75,7 @@ services:
   temporal-create-namespace:
     image: temporalio/admin-tools:1.31.2
     environment:
+      TZ: Europe/Warsaw
       TEMPORAL_ADDRESS: temporal:7233
       DEFAULT_NAMESPACE: default
       DEFAULT_NAMESPACE_RETENTION: 24h
@@ -83,6 +92,7 @@ services:
       context: .
       target: migrations
     environment:
+      TZ: Europe/Warsaw
       DATABASE_URL: postgresql+asyncpg://postgres:postgres@postgres:5432/tg_playground
     depends_on:
       postgres:
@@ -94,6 +104,7 @@ services:
       target: api
     command: ["uv", "run", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
     environment:
+      TZ: Europe/Warsaw
       DATABASE_URL: postgresql+asyncpg://postgres:postgres@postgres:5432/tg_playground
       REDIS_URL: redis://redis:6379/0
       TEMPORAL_HOST: temporal:7233
@@ -115,6 +126,7 @@ services:
       context: .
       target: worker
     environment:
+      TZ: Europe/Warsaw
       DATABASE_URL: postgresql+asyncpg://postgres:postgres@postgres:5432/tg_playground
       REDIS_URL: redis://redis:6379/0
       TEMPORAL_HOST: temporal:7233
@@ -128,3 +140,4 @@ services:
 
 volumes:
   pgdata:
+    name: tg-playground-backend_pgdata

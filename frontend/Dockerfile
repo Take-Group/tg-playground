@@ -1,7 +1,12 @@
 FROM oven/bun:1.3.14-alpine AS runtime
 
 WORKDIR /app
-RUN apk upgrade --no-cache && chown bun:bun /app
+ENV TZ=Europe/Warsaw
+ENV NEXT_PUBLIC_TIME_ZONE=Europe/Warsaw
+
+RUN apk upgrade --no-cache \
+    && apk add --no-cache tzdata \
+    && chown bun:bun /app
 USER bun
 
 FROM runtime AS base

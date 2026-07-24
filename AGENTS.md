@@ -4,30 +4,39 @@
 
 **Jedynym wspieranym sposobem uruchomienia projektu jest Docker.**
 
-Projekt składa się z dwóch niezależnych instancji Docker — jednej dla backendu, drugiej dla frontendu. Każda z nich ma własny `docker-compose` w swoim folderze.
+Główny `compose.yaml` uruchamia frontend, backend i całą infrastrukturę jednym poleceniem. Pliki Compose w `backend/` i `frontend/` pozostają dostępne do pracy tylko nad wybraną częścią projektu.
 
-### Backend
+### Cały projekt
+```bash
+docker compose up --build
+```
+
+### Zatrzymanie
+```bash
+docker compose down
+```
+
+Wolumen PostgreSQL jest współdzielony z uruchomieniem samego backendu. Aby świadomie usunąć dane:
+```bash
+docker compose down -v
+```
+
+### Uruchomienie tylko jednej części
+
+Backend:
 ```bash
 cd backend
 docker compose up --build
 ```
-Backend podnosi: API (FastAPI), worker (Temporal), migracje (Alembic), PostgreSQL, Redis, Temporal.
 
-### Frontend
+Frontend:
 ```bash
 cd frontend
 docker compose up --build
 ```
 
-### Zatrzymanie
-W każdym folderze osobno:
-```bash
-docker compose down
-```
-Aby usunąć dane (volumes):
-```bash
-docker compose down -v
-```
+Nie uruchamiaj jednocześnie całego projektu i osobnego stosu. Korzystają z
+tych samych portów, a backend współdzieli ten sam wolumen PostgreSQL.
 
 ### Dostępne adresy po uruchomieniu
 | Serwis       | Adres                          |
@@ -153,11 +162,13 @@ Gdy zmieniasz kod objęty skillem — zaktualizuj też skill. Nieaktualny skill 
 - [new-model.md](skills/backend/new-model.md) — how to add a SQLAlchemy model + Alembic migration
 - [new-workflow.md](skills/backend/new-workflow.md) — how to add a Temporal workflow + activities
 - [temporal-local-stack.md](skills/backend/temporal-local-stack.md) — how the local Temporal Server is initialized without Web UI
+- [timezone.md](skills/backend/timezone.md) — how Polish time is configured across backend services
 
 **Frontend (`skills/frontend/`):**
 - [new-page.md](skills/frontend/new-page.md) — how to add a new page/route (App Router)
 - [new-component.md](skills/frontend/new-component.md) — how to add a UI component (shadcn + CVA pattern)
 - [api-communication.md](skills/frontend/api-communication.md) — how to connect frontend to backend API (React Query + fetch)
+- [timezone.md](skills/frontend/timezone.md) — how to format dates consistently in Polish time
 
 ### Firmowe API (MCP — TG Endpoints)
 Jeśli potrzebujesz danych z wewnętrznych projektów firmowych — **Blog CMS, VOD CMS, LP CMS, OSA, OMS, DMS** — korzystaj z firmowego serwera MCP.
