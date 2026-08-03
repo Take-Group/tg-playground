@@ -1,0 +1,31 @@
+# Kontekst budowania to katalog główny — wycinamy wszystko, co nie jest źródłem.
+
+.git/
+.gitignore
+
+# Dokumentacja i pamięć projektu
+*.md
+memory/
+skills/
+
+# Backend
+backend/.venv/
+backend/.env
+backend/__pycache__/
+backend/**/__pycache__/
+backend/**/*.py[cod]
+backend/.ruff_cache/
+backend/.mypy_cache/
+backend/.pytest_cache/
+
+# Frontend
+frontend/node_modules/
+frontend/.next/
+frontend/.env*.local
+frontend/tsconfig.tsbuildinfo
+
+# Narzędzia
+.claude/
+.vscode/
+.idea/
+.DS_Store

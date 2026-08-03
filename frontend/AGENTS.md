@@ -13,28 +13,34 @@
 | Ikony           | Lucide React                         |
 | Linting         | ESLint 9 (eslint-config-next)        |
 
-## Uruchomienie całego projektu (zalecane)
+## Uruchomienie (jedyny wspierany sposob)
 
 ```bash
 cd tg-playground
 docker compose up --build
 ```
 
-## Uruchomienie tylko frontendu
+Frontend nie ma wlasnego `Dockerfile` ani `docker-compose.yml`. Buduje go
+glowny `Dockerfile` w katalogu glownym:
 
-```bash
-cd frontend
-docker compose up --build
-```
-
-Dockerfile korzysta z multi-stage build:
-
-1. **runtime** — przypiety Bun Alpine z aktualnymi bibliotekami systemowymi.
-2. **base** — instaluje zaleznosci i uruchamia development jako uzytkownik `bun`.
-3. **build** — buduje aplikacje (`bun run build`).
-4. **runner** — kopiuje standalone output i serwuje przez `bun server.js` jako non-root.
+1. **frontend-build** — obraz Bun instaluje zaleznosci i wykonuje `bun run build`.
+2. **app** — obraz finalny dostaje sam wynik `next build` (standalone) plus
+   binarke `bun`, i serwuje go przez `bun server.js` jako non-root, obok
+   procesow backendu (supervisor).
 
 Next.js jest skonfigurowany z `output: "standalone"` (`next.config.ts`), dzieki czemu `.next/standalone` zawiera minimalny serwer gotowy do deploymentu.
+
+**Nie ma hot-reloadu.** Frontend leci w buildzie produkcyjnym, wiec po kazdej
+zmianie w `src/` trzeba przebudowac obraz (`docker compose up --build`).
+Restart samego procesu frontendu bez przebudowy:
+
+```bash
+docker compose exec app supervisorctl -c /etc/supervisor/supervisord.conf restart frontend
+```
+
+Frontend jest dostepny pod http://localhost:3000. Jesli port 3000 jest zajety
+przez inna aplikacje — nie zabijaj jej. Zmien port zgodnie z procedura
+w glownym [AGENTS.md](../AGENTS.md).
 
 ## Zasady kodowania
 

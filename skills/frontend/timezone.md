@@ -7,9 +7,10 @@ Keeps server-side and browser-side date formatting in the Polish
 
 ## Files involved
 
-- `frontend/docker-compose.yml` — sets `TZ` and `NEXT_PUBLIC_TIME_ZONE`
-- `frontend/Dockerfile` — installs `tzdata` and sets both variables for build
-  and production runtime
+- `compose.yaml` — sets `TZ` on the `app` service
+- `Dockerfile` — the `frontend-build` stage sets `NEXT_PUBLIC_TIME_ZONE` so it
+  is inlined into the client bundle; the `app` target installs `tzdata` and
+  sets both variables for the production runtime
 - `frontend/src/lib/date-time.ts` — shared `formatDateTime` formatter
 
 ## Flow

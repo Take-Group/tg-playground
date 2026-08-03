@@ -13,14 +13,22 @@
 
 ---
 
-## Serwisy backendowe w Docker Compose
-Backend składa się z trzech serwisów aplikacyjnych:
+## Procesy backendowe
+Backend nie ma własnego `Dockerfile` ani `docker-compose.yml`. Buduje go
+główny `Dockerfile` w katalogu głównym (target `app`), a uruchamia
+`compose.yaml` z katalogu głównego.
 
-| Serwis     | Opis                                              |
+W kontenerze `app` backend działa jako dwa procesy pod supervisorem, obok
+procesu frontendu:
+
+| Proces     | Opis                                               |
 |------------|----------------------------------------------------|
 | api        | FastAPI REST API (port 8000)                       |
 | worker     | Temporal worker - przetwarza workflow              |
-| migrations | Alembic migracje (run-to-completion przed startem) |
+
+Migracje Alembic nie są osobnym serwisem — wykonuje je `docker/entrypoint.sh`
+przed startem supervisora (z retry, na wypadek gdyby baza jeszcze nie
+przyjmowała połączeń).
 
 Zależności infrastrukturalne:
 
@@ -42,24 +50,27 @@ wyłącznie wewnątrz sieci Docker Compose.
 ### Wymagania
 - Docker + Docker Compose
 
-### Start całego projektu (zalecane)
+### Start (jedyny wspierany sposób)
 ```bash
 cd tg-playground
-docker compose up --build
-```
-
-### Start tylko backendu
-```bash
-cd tg-playground
-cd backend
 docker compose up --build
 ```
 Migracje bazy wykonają się automatycznie przed startem API.
+
+Nie da się uruchomić samego backendu — cały projekt startuje z jednego
+`compose.yaml` w katalogu głównym. Aby zrestartować sam proces API bez
+przebudowy obrazu:
+```bash
+docker compose exec app supervisorctl -c /etc/supervisor/supervisord.conf restart api
+```
 
 ### Dostępne adresy
 - API: http://localhost:8000
 - API health: http://localhost:8000/health
 - API readiness: http://localhost:8000/health/ready
+
+Jeśli port 8000 jest zajęty przez inną aplikację — nie zabijaj jej. Zmień port
+zgodnie z procedurą „Konflikty portów" w głównym [AGENTS.md](../AGENTS.md).
 
 ### Zatrzymanie
 ```bash

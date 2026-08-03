@@ -2,4 +2,5 @@
 - [UI Design System](ui-design-system.md) — font sans, dark slate/navy + teal primary, kursory, konwencje modali/tabel/dashboardów
 - [Known issues](known-issues.md) — przypięte ESLint/TypeScript, Redis 8, Temporal bez UI i upstreamowe CVE obrazów
 - [Project timezone](timezone.md) — `Europe/Warsaw` dla usług, reguł biznesowych i prezentacji
-- [Docker orchestration](docker-orchestration.md) — jeden główny Compose z opcjonalnym uruchamianiem osobnych stosów
+- [Docker orchestration](docker-orchestration.md) — jeden Dockerfile i jeden Compose; backend i frontend w jednym kontenerze
+- [Konflikty portów](port-conflicts.md) — port zajęty? zmień go u siebie na losowy, nigdy nie zabijaj cudzego stacku

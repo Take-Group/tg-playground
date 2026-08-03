@@ -4,7 +4,7 @@
 
 **Jedynym wspieranym sposobem uruchomienia projektu jest Docker.**
 
-Główny `compose.yaml` uruchamia frontend, backend i całą infrastrukturę jednym poleceniem. Pliki Compose w `backend/` i `frontend/` pozostają dostępne do pracy tylko nad wybraną częścią projektu.
+W katalogu głównym jest **jeden `Dockerfile` i jeden `compose.yaml`**. Nie ma osobnych plików Compose ani Dockerfile w `backend/` i `frontend/`.
 
 ### Cały projekt
 ```bash
@@ -16,27 +16,38 @@ docker compose up --build
 docker compose down
 ```
 
-Wolumen PostgreSQL jest współdzielony z uruchomieniem samego backendu. Aby świadomie usunąć dane:
+Aby świadomie usunąć dane:
 ```bash
 docker compose down -v
 ```
 
-### Uruchomienie tylko jednej części
+### Jak zbudowany jest obraz
 
-Backend:
+Główny `Dockerfile` (kontekst budowania = katalog główny) ma trzy targety:
+
+| Target     | Co zawiera                                                        |
+|------------|-------------------------------------------------------------------|
+| `app`      | backend (API + worker + migracje) **i** frontend w jednym kontenerze |
+| `postgres` | PostgreSQL 18 ze strefą `Europe/Warsaw`                            |
+| `redis`    | Redis 8 ze strefą `Europe/Warsaw`                                  |
+
+Kontener `app` przy starcie wykonuje migracje Alembic (`docker/entrypoint.sh`),
+a następnie uruchamia trzy procesy pod supervisorem
+(`docker/supervisord.conf`): `api`, `worker` i `frontend`. Logi wszystkich
+trzech trafiają na wspólny stdout — `docker compose logs app`.
+
+Frontend jest budowany produkcyjnie (`next build`, tryb `standalone`), więc
+**nie ma hot-reloadu ani watch mode**. Po zmianie kodu backendu lub frontendu
+trzeba przebudować obraz:
 ```bash
-cd backend
 docker compose up --build
 ```
 
-Frontend:
+Podgląd i restart pojedynczego procesu bez restartu całego kontenera:
 ```bash
-cd frontend
-docker compose up --build
+docker compose exec app supervisorctl -c /etc/supervisor/supervisord.conf status
+docker compose exec app supervisorctl -c /etc/supervisor/supervisord.conf restart api
 ```
-
-Nie uruchamiaj jednocześnie całego projektu i osobnego stosu. Korzystają z
-tych samych portów, a backend współdzieli ten sam wolumen PostgreSQL.
 
 ### Dostępne adresy po uruchomieniu
 | Serwis       | Adres                          |
@@ -44,6 +55,56 @@ tych samych portów, a backend współdzieli ten sam wolumen PostgreSQL.
 | Frontend     | http://localhost:3000           |
 | API          | http://localhost:8000           |
 | API health   | http://localhost:8000/health    |
+
+---
+
+## Konflikty portów — obowiązkowa procedura dla AI agentów
+
+Ten projekt to boilerplate. Na jego bazie powstaje wiele osobnych aplikacji,
+które często działają **jednocześnie na tej samej maszynie** i biją się o te
+same porty hosta (3000 i 8000). To normalna sytuacja, nie awaria.
+
+**Jeśli `docker compose up` pada z `port is already allocated`, albo widzisz,
+że port jest zajęty — zmień port w tym projekcie na inny, losowy i wolny.**
+
+### Czego NIE robić
+**Nigdy nie zatrzymuj cudzego kontenera ani stosu, żeby zwolnić port.**
+To najczęściej inna, działająca aplikacja użytkownika. Zatrzymanie jej
+niszczy komuś pracę.
+
+### Jak sprawdzić, co zajmuje port
+```bash
+docker ps --format '{{.Names}}\t{{.Ports}}'
+lsof -nP -iTCP:3000 -sTCP:LISTEN
+```
+
+### Procedura zmiany portu
+1. Wybierz losowy wolny port z zakresu **10000–65000** (osobny dla frontendu
+   i osobny dla API).
+2. Zmień **tylko stronę hosta** w mapowaniu portów w `compose.yaml`:
+   ```yaml
+   ports:
+     - "127.0.0.1:<NOWY_API>:8000"
+     - "127.0.0.1:<NOWY_FRONT>:3000"
+   ```
+   Porty wewnątrz kontenera (8000, 3000) zostawiaj bez zmian — nic w sieci
+   Compose z nimi nie koliduje.
+3. Zaktualizuj **wszystkie** miejsca, w których nowy port jest widoczny dla
+   użytkownika:
+   - `AGENTS.md` — tabela „Dostępne adresy po uruchomieniu" powyżej
+   - `backend/AGENTS.md` — sekcja „Dostępne adresy"
+   - `frontend/AGENTS.md` i `frontend/README.md`
+   - `skills/frontend/api-communication.md` — domyślny `NEXT_PUBLIC_API_URL`
+   - `NEXT_PUBLIC_API_URL` w `compose.yaml`, jeśli frontend woła API
+     z przeglądarki (przeglądarka używa portu **hosta**, nie nazwy serwisu)
+4. Jeżeli z jakiegoś powodu zmieniasz też port **wewnątrz** kontenera,
+   zaktualizuj dodatkowo: `Dockerfile` (`EXPOSE`, `ENV PORT`),
+   `docker/supervisord.conf` (`uvicorn --port`), healthcheck serwisu `app`
+   w `compose.yaml`, `backend/app/config.py` (`port`).
+5. **Napisz użytkownikowi, jakie porty wybrałeś i dlaczego.**
+
+Porty `5432` (PostgreSQL), `6379` (Redis) i `7233` (Temporal) nie są
+publikowane na hoście i nie mogą kolidować — nie ruszaj ich.
 
 ---
 
@@ -158,6 +219,7 @@ Gdy zmieniasz kod objęty skillem — zaktualizuj też skill. Nieaktualny skill 
 #### Lista skilli
 
 **Backend (`skills/backend/`):**
+- [docker-single-image.md](skills/backend/docker-single-image.md) — jeden Dockerfile i jeden kontener dla backendu i frontendu
 - [new-endpoint.md](skills/backend/new-endpoint.md) — how to add a new REST API endpoint (router → service → schema)
 - [new-model.md](skills/backend/new-model.md) — how to add a SQLAlchemy model + Alembic migration
 - [new-workflow.md](skills/backend/new-workflow.md) — how to add a Temporal workflow + activities

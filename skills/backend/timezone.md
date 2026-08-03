@@ -7,11 +7,10 @@ including automatic daylight-saving time changes.
 
 ## Files involved
 
-- `backend/docker-compose.yml` — passes `TZ` to every service and configures
-  PostgreSQL session and log timezones
-- `backend/Dockerfile` — installs timezone data for API, worker, and migrations
-- `backend/Dockerfile.postgres` — installs timezone data for PostgreSQL
-- `backend/Dockerfile.redis` — adds timezone data to the Redis Alpine image
+- `compose.yaml` — passes `TZ` to every service and configures PostgreSQL
+  session and log timezones
+- `Dockerfile` — one file, three targets: `app` (installs `tzdata` for API,
+  worker and migrations), `postgres`, and `redis` (both add `tzdata`)
 - `backend/app/config.py` — exposes the application timezone as
   `settings.timezone`
 - `backend/.env.example` — documents the default `TZ`
@@ -29,7 +28,8 @@ Business rules and presentation convert those instants to `Europe/Warsaw`.
 
 ## How to extend
 
-- Add `TZ: Europe/Warsaw` to every new backend Compose service.
-- Install `tzdata` in every new minimal or Alpine-based custom image.
+- Add `TZ: Europe/Warsaw` to every new service in the root `compose.yaml`.
+- Install `tzdata` in every new minimal or Alpine-based target added to the
+  root `Dockerfile`.
 - Use timezone-aware datetimes. Do not persist ambiguous naive local
   datetimes.

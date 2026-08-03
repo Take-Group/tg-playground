@@ -8,8 +8,8 @@ a właściwy serwer działa na wspieranym obrazie `temporalio/server`.
 
 ## Pliki
 
-- `backend/docker-compose.yml` — serwer, zależności i kolejność startu.
-- `backend/Dockerfile.postgres` — minimalny obraz PostgreSQL uruchamiany
+- `compose.yaml` — serwer, zależności i kolejność startu.
+- `Dockerfile` (target `postgres`) — minimalny obraz PostgreSQL uruchamiany
   bezpośrednio jako non-root, bez nieużywanego binarium `gosu`.
 - `backend/temporal/scripts/setup-postgres.sh` — tworzenie i aktualizacja
   schematów `temporal` oraz `temporal_visibility`.
@@ -25,7 +25,8 @@ a właściwy serwer działa na wspieranym obrazie `temporalio/server`.
 2. `temporal-schema-setup` tworzy lub aktualizuje oba schematy Temporal.
 3. `temporal` uruchamia serwer z konfiguracją SQL.
 4. `temporal-create-namespace` czeka na serwer i zapewnia namespace `default`.
-5. Worker startuje dopiero po zakończeniu inicjalizacji namespace.
+5. Kontener `app` startuje dopiero po zakończeniu inicjalizacji namespace;
+   supervisor uruchamia w nim proces `worker`.
 
 PostgreSQL, Redis i Temporal są dostępne wyłącznie w sieci Compose. Web UI
 nie jest częścią stacku.

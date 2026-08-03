@@ -1,22 +1,30 @@
 ---
 name: Docker orchestration
-description: The whole project starts from one root Compose file while component Compose files stay reusable.
+description: One root Dockerfile and one root Compose file; backend and frontend share a single container.
 type: decision
 ---
 
-The default project startup command is run from the repository root:
+Decyzja użytkownika (2026-08-03): **jeden główny `Dockerfile` buduje wszystko**,
+a backend i frontend działają w **jednym kontenerze**.
+
+Jedyna komenda startowa, z katalogu głównego repozytorium:
 
 ```bash
 docker compose up --build
 ```
 
-The root `compose.yaml` includes `backend/docker-compose.yml` and
-`frontend/docker-compose.yml`. Developers may still run either component
-independently from its own directory.
+Osobne pliki `backend/docker-compose.yml`, `frontend/docker-compose.yml`,
+`backend/Dockerfile`, `backend/Dockerfile.postgres`, `backend/Dockerfile.redis`
+i `frontend/Dockerfile` zostały usunięte. Nie odtwarzaj ich — użytkownik
+świadomie wybrał układ jednoplikowy.
 
-The PostgreSQL volume has the explicit name
-`tg-playground-backend_pgdata`, so root and backend-only startup modes use
-the same local data instead of creating separate databases.
+Kompromis zaakceptowany przez użytkownika mimo wyraźnego ostrzeżenia:
+brak hot-reloadu (frontend leci na buildzie produkcyjnym, backend bez
+`--reload`), wspólne logi i wspólny restart obu warstw. Nie "poprawiaj" tego
+wracając do osobnych kontenerów bez pytania.
 
-Do not run the root stack and either component stack at the same time. They
-use the same host ports, and both backend modes share the PostgreSQL volume.
+Wolumen PostgreSQL zachował dotychczasową nazwę `tg-playground-backend_pgdata`,
+żeby scalenie stosów nie skasowało lokalnych danych deweloperskich. Nazwa jest
+myląca (sugeruje osobny stos backendu), ale zmiana oznaczałaby utratę danych.
+
+Szczegóły techniczne i pułapki: `skills/backend/docker-single-image.md`.

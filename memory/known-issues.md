@@ -28,7 +28,7 @@ Redis 8 jest na licencji AGPLv3/RSALv2/SSPLv1 — dla boilerplate'u OK, ale
 warto pamiętać przy komercyjnym użyciu.
 
 ## Temporal UI usunięte
-Panel `temporal-ui` (port 8233) wyrzucony z `backend/docker-compose.yml` —
+Panel `temporal-ui` (port 8233) wyrzucony z `compose.yaml` —
 sam serwer `temporal` zostaje, bo worker go potrzebuje. Serwer działa na
 wspieranym `temporalio/server`; schemat i namespace inicjalizują osobne,
 krótkotrwałe kontenery `temporalio/admin-tools`. Port 7233 nie jest
@@ -42,11 +42,27 @@ aktualizacją pakietów aplikacji. Przy kolejnych wydaniach obrazów sprawdź,
 czy upstream opublikował wersję z poprawionym Go/gRPC, i aktualizuj przypięte
 tagi po pełnym teście Docker Compose.
 
-## Lokalny wolumen PostgreSQL z obcą historią Alembic
+## Lokalny wolumen PostgreSQL z obcą historią Alembic — ROZWIĄZANE
 
-Na maszynie użytej podczas audytu istniejący wolumen
-`tg-playground-backend_pgdata` zawiera rewizję Alembic `478be46c25fa`
-i tabele, których nie ma w tym boilerplate. Wolumen został zachowany.
-Świeży wolumen przechodzi migracje poprawnie. Przed ewentualnym
-`docker compose down -v` trzeba zdecydować, czy te lokalne dane wymagają
-kopii zapasowej.
+Wolumen `tg-playground-backend_pgdata` zawierał obcą rewizję Alembic
+`478be46c25fa`, przez co `alembic upgrade head` padał z
+`Can't locate revision identified by '478be46c25fa'` (katalog
+`backend/alembic/versions/` jest pusty — jest tylko `.gitkeep`) i kontener
+`app` nie startował.
+
+2026-08-03 użytkownik zdecydował o skasowaniu wolumenu (`docker compose down -v`).
+Uzasadnienie użytkownika: to playground, lokalne dane nie mają wartości —
+liczy się to, żeby stack działał. Po skasowaniu pełny stack startuje
+poprawnie. Przy podobnym problemie w przyszłości nie trzeba się wahać z
+`docker compose down -v`, ale nadal warto o tym poinformować.
+
+## Porty 3000 i 8000 bywają zajęte przez inny projekt
+
+Aplikacje budowane na tym boilerplate dziedziczą porty 3000 i 8000 i kolidują
+ze sobą, gdy działają równolegle. Na maszynie użytkownika robi to m.in. projekt
+`pulse` (`~/projects/affleaders/pulse`).
+
+Nie zabijaj cudzego stacku. Pełna procedura zmiany portu jest w `AGENTS.md`
+(sekcja „Konflikty portów"), kontekst decyzji w `memory/port-conflicts.md`.
+Sam TG Playground zostaje na 3000/8000 — reguła dotyczy appek budowanych
+na jego bazie.
