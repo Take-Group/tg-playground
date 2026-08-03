@@ -4,3 +4,4 @@
 - [Project timezone](timezone.md) — `Europe/Warsaw` dla usług, reguł biznesowych i prezentacji
 - [Docker orchestration](docker-orchestration.md) — jeden Dockerfile i jeden Compose; backend i frontend w jednym kontenerze
 - [Konflikty portów](port-conflicts.md) — port zajęty? zmień go u siebie na losowy, nigdy nie zabijaj cudzego stacku
+- [Git workflow](git-workflow.md) — commit i push prosto na `main`, bez gałęzi i PR-ów
