@@ -8,17 +8,17 @@ version = "0.1.0"
 description = "TG Playground Backend"
 requires-python = ">=3.14"
 dependencies = [
-    "fastapi>=0.139",
-    "uvicorn[standard]>=0.51",
-    "pydantic>=2.13",
-    "pydantic-settings>=2.14.2",
-    "sqlalchemy[asyncio]>=2.0.51",
+    "fastapi>=0.141.1",
+    "uvicorn[standard]>=0.52.3",
+    "pydantic>=2.13.4",
+    "pydantic-settings>=2.15",
+    "sqlalchemy[asyncio]>=2.0.52",
     "asyncpg>=0.31",
-    "alembic>=1.18",
-    "redis>=8.0",
-    "temporalio>=1.30",
+    "alembic>=1.19.1",
+    "redis>=8.1",
+    "temporalio>=1.31",
     "structlog>=26.1",
-    "httpx>=0.28",
+    "httpx>=0.28.1",
 ]
 
 [project.scripts]

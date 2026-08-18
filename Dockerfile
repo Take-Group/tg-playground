@@ -36,7 +36,7 @@ RUN bun run build
 
 
 # --- Build backendu: zależności Pythona + kod aplikacji ----------------------
-FROM ghcr.io/astral-sh/uv:0.11.31-python3.14-trixie-slim AS backend-build
+FROM ghcr.io/astral-sh/uv:0.12.5-python3.14-trixie-slim AS backend-build
 
 WORKDIR /app/backend
 
@@ -52,7 +52,7 @@ RUN uv sync --frozen --no-dev
 
 
 # --- Obraz finalny: backend i frontend pod jednym supervisorem ---------------
-FROM ghcr.io/astral-sh/uv:0.11.31-python3.14-trixie-slim AS app
+FROM ghcr.io/astral-sh/uv:0.12.5-python3.14-trixie-slim AS app
 
 ENV TZ=Europe/Warsaw \
     PYTHONUNBUFFERED=1 \
@@ -67,6 +67,13 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 RUN groupadd --system app && useradd --system --gid app --home-dir /app app
+
+# pip nie jest używany w runtime — zależności instaluje uv na etapie budowania,
+# a aplikacja startuje z gotowego venv (/app/backend/.venv). Usunięcie pip-a
+# zdejmuje z obrazu jego vendorowane biblioteki, które ciągną za sobą CVE.
+RUN rm -rf /usr/local/lib/python3.14/site-packages/pip \
+           /usr/local/lib/python3.14/site-packages/pip-*.dist-info \
+    && rm -f /usr/local/bin/pip /usr/local/bin/pip3 /usr/local/bin/pip3.14
 
 # Runtime JS — pojedyncza binarka, bez pełnego obrazu Node/Bun
 COPY --from=bun-binary /usr/local/bin/bun /usr/local/bin/bun
@@ -94,7 +101,7 @@ CMD ["supervisord", "--nodaemon", "--configuration", "/etc/supervisor/supervisor
 
 
 # --- PostgreSQL --------------------------------------------------------------
-FROM postgres:18.4 AS postgres
+FROM postgres:18.6 AS postgres
 
 ENV TZ=Europe/Warsaw
 
@@ -107,7 +114,7 @@ USER postgres
 
 
 # --- Redis -------------------------------------------------------------------
-FROM redis:8.8.0-alpine AS redis
+FROM redis:8.10.0-alpine AS redis
 
 ENV TZ=Europe/Warsaw
 
